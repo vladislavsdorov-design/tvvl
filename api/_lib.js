@@ -8,11 +8,36 @@ export const KEY_TOKEN = "vm:token";   // токен, с которым подк
 
 // ---------- Redis (Upstash REST) ----------
 // Интеграция Upstash в Vercel создаёт KV_REST_API_URL / KV_REST_API_TOKEN.
+// При подключении Vercel может добавить к именам свой префикс (например STORAGE_KV_REST_API_URL),
+// поэтому ищем любую пару ..._REST_API_URL + ..._REST_API_TOKEN.
 function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error("Не подключена база Redis: Vercel → Storage → Upstash for Redis");
+  const env = process.env;
+  let url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL;
+  let token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) {
+    for (const key of Object.keys(env)) {
+      if (!/(_REST_API_URL|_REDIS_REST_URL)$/.test(key)) continue;
+      const tokenKey = key.replace(/_URL$/, "_TOKEN");
+      if (env[key] && env[tokenKey]) { url = env[key]; token = env[tokenKey]; break; }
+    }
+  }
+  if (!url || !token) {
+    const seen = Object.keys(env).filter((k) => /KV|REDIS|UPSTASH/i.test(k));
+    throw new Error(
+      "Не подключена база Redis: Vercel → Storage → Upstash for Redis → Connect Project, затем Redeploy." +
+      (seen.length ? " Найдены переменные: " + seen.join(", ") : " Переменных базы в проекте нет.")
+    );
+  }
   return { url: url.replace(/\/+$/, ""), token };
+}
+
+// Токен Vercel Blob: обычно BLOB_READ_WRITE_TOKEN, но тоже может быть с префиксом
+export function blobToken() {
+  const env = process.env;
+  if (env.BLOB_READ_WRITE_TOKEN) return env.BLOB_READ_WRITE_TOKEN;
+  const key = Object.keys(env).find((k) => k.endsWith("_READ_WRITE_TOKEN") && String(env[k]).startsWith("vercel_blob_rw_"));
+  if (key) return env[key];
+  throw new Error("Не подключено хранилище Blob: Vercel → Storage → Blob → Connect Project, затем Redeploy.");
 }
 
 export async function redis(...command) {

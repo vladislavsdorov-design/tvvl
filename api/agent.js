@@ -5,7 +5,7 @@
 //   done    — видео скачано, можно удалить его из Vercel Blob
 //   requeue — не получилось выполнить, вернуть задание в очередь
 import { del } from "@vercel/blob";
-import { KEY_CMDS, KEY_STATUS, requireAgent, redis, parseJson, methodGuard, fail } from "./_lib.js";
+import { KEY_CMDS, KEY_STATUS, requireAgent, redis, parseJson, methodGuard, fail, blobToken } from "./_lib.js";
 
 const WAIT_SECONDS = 20;
 
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       }
       case "done": {
         if (body.url) {
-          try { await del(body.url); } catch (e) { console.error("Blob del:", e.message); }
+          try { await del(body.url, { token: blobToken() }); } catch (e) { console.error("Blob del:", e.message); }
         }
         return res.status(200).json({ ok: true });
       }
