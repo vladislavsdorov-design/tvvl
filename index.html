@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#030303">
+<title>DJ La Pose · Видео</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030303; --fg: #fafafa; --fg2: rgba(250,250,250,.74); --m: rgba(250,250,250,.5); --m2: rgba(250,250,250,.32);
+    --s1: rgba(255,255,255,.025); --s2: rgba(255,255,255,.05); --s3: rgba(255,255,255,.08); --s4: rgba(255,255,255,.13);
+    --b1: rgba(255,255,255,.08); --b2: rgba(255,255,255,.13); --b3: rgba(255,255,255,.24); --b4: rgba(255,255,255,.45);
+    --r: 22px; --r2: 14px; --r3: 11px;
+    --ease: cubic-bezier(.22,1,.36,1); --spring: cubic-bezier(.34,1.56,.64,1);
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--fg);
+         font: 400 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+  code { font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+  .ico { flex: none; display: block; }
+
+  /* ---------- фон ---------- */
+  .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .bg-orb { position: absolute; border-radius: 50%; will-change: transform; }
+  .bg-orb.a { width: 1000px; height: 1000px; top: -600px; left: calc(50% - 500px);
+              background: radial-gradient(circle, rgba(255,255,255,.14), transparent 60%);
+              animation: drift 22s ease-in-out infinite alternate; }
+  .bg-orb.b { width: 800px; height: 800px; bottom: -500px; right: -260px;
+              background: radial-gradient(circle, rgba(255,255,255,.07), transparent 60%);
+              animation: drift 28s ease-in-out infinite alternate-reverse; }
+  .bg-grid { position: absolute; inset: 0;
+             background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+                               linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+             background-size: 56px 56px;
+             -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 25%, transparent 75%);
+             mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 25%, transparent 75%); }
+  .bg-light { position: absolute; left: 0; top: 0; width: 700px; height: 700px; transform: translate3d(-9999px,0,0);
+              background: radial-gradient(circle, rgba(255,255,255,.045), transparent 60%); will-change: transform; }
+  .bg-noise { position: absolute; inset: 0; opacity: .06; mix-blend-mode: overlay;
+              background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* ---------- стекло ---------- */
+  .glass { position: relative; isolation: isolate; background: linear-gradient(180deg, #ffffff0e, #ffffff04);
+           border: 1px solid var(--b1); border-radius: var(--r);
+           -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%);
+           box-shadow: inset 0 1px #ffffff12, 0 24px 48px -28px #000000b3; }
+  .glass::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+                   background: radial-gradient(420px circle at var(--mx,50%) var(--my,-100%), rgba(255,255,255,.06), transparent 45%);
+                   opacity: 0; transition: opacity .5s; }
+  .glass::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+                  background: radial-gradient(260px circle at var(--mx,50%) var(--my,-100%), rgba(255,255,255,.5), transparent 45%);
+                  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+                  opacity: 0; transition: opacity .5s; }
+  .glass.lit::before, .glass.lit::after { opacity: 1; }
+  .card { padding: 24px; }
+
+  /* ---------- логотип ---------- */
+  .brand-mark { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 11px;
+                background: var(--fg); color: #000; box-shadow: 0 0 28px #ffffff47; }
+  .brand-mark .ico { animation: spin 5s linear infinite; }
+  .brand-mark.lg { width: 60px; height: 60px; border-radius: 18px; box-shadow: 0 0 60px #ffffff4d;
+                   animation: float 4s ease-in-out infinite; }
+
+  /* ---------- кнопки и поля ---------- */
+  .btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+         height: 40px; padding: 0 16px; border-radius: var(--r3); border: 1px solid transparent;
+         font-weight: 500; font-size: 14px; white-space: nowrap; user-select: none; overflow: hidden;
+         transition: transform .25s var(--ease), background .2s, border-color .2s, color .2s, box-shadow .3s, opacity .2s; }
+  .btn:active:not(:disabled) { transform: scale(.96); }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .btn.primary { background: var(--fg); color: #000; }
+  .btn.primary::after { content: ""; position: absolute; inset: 0; transform: translate(-120%);
+                        background: linear-gradient(110deg, transparent 30%, rgba(0,0,0,.14) 50%, transparent 70%); }
+  .btn.primary:hover:not(:disabled) { background: #fff; transform: translateY(-1px); box-shadow: 0 10px 34px -8px #ffffff73; }
+  .btn.primary:hover:not(:disabled)::after { transform: translate(120%); transition: transform .8s var(--ease); }
+  .btn.ghost { background: var(--s2); border-color: var(--b2); color: var(--fg); }
+  .btn.ghost:hover:not(:disabled) { background: var(--s4); border-color: var(--b3); }
+  .btn.danger { color: var(--m); border-color: var(--b1); }
+  .btn.danger:hover:not(:disabled) { color: var(--fg); border-color: var(--b3); }
+  .btn.danger.armed { background: var(--fg); color: #000; border-color: var(--fg); animation: shake .4s; }
+  .btn.icon { width: 38px; padding: 0; border-color: var(--b1); color: var(--fg2); }
+  .btn.icon:hover:not(:disabled) { background: var(--s3); border-color: var(--b2); color: var(--fg); }
+  .btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+  .btn.icon.sm { width: 32px; padding: 0; border-radius: 9px; }
+  .btn.lg { height: 48px; padding: 0 22px; font-size: 15px; border-radius: 13px; }
+  .btn.wide { width: 100%; }
+  .btn.link { height: auto; padding: 4px 8px; color: var(--m); font-size: 13px; overflow: visible; }
+  .btn.link:hover { color: var(--fg); }
+
+  .input { width: 100%; height: 42px; padding: 0 14px; border-radius: var(--r3); border: 1px solid var(--b2);
+           background: #00000059; color: var(--fg); font: inherit; outline: none;
+           transition: border-color .2s, box-shadow .25s, background .2s; }
+  .input::placeholder { color: var(--m2); }
+  .input:hover { border-color: var(--b3); }
+  .input:focus { border-color: var(--b4); background: #0000008c; box-shadow: 0 0 0 4px #ffffff12; }
+  .field { position: relative; display: block; }
+  .field .ico { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--m2);
+                transition: color .2s; pointer-events: none; }
+  .field .input { height: 48px; padding-left: 44px; }
+  .field:focus-within .ico { color: var(--fg); }
+  .fields { display: flex; flex-direction: column; gap: 10px; }
+  .fields > * { animation: enter .5s var(--ease) backwards; }
+  .fields > :nth-child(2) { animation-delay: 50ms; }
+  .fields > :nth-child(3) { animation-delay: .1s; }
+
+  /* ---------- экран входа / ожидания ---------- */
+  .auth-wrap { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center;
+               justify-content: center; gap: 22px; padding: 24px 16px; }
+  .auth { width: 100%; max-width: 410px; padding: 34px 30px 26px; display: flex; flex-direction: column; gap: 14px;
+          animation: authIn .9s var(--ease) backwards; }
+  .auth.wide { max-width: 470px; }
+  .auth-logo { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; text-align: center; }
+  .auth-logo h1 { margin-top: 8px; font: 700 21px var(--display); letter-spacing: .26em; }
+  .auth-logo p { color: var(--m); font-size: 13px; }
+  .msg { min-height: 20px; text-align: center; color: var(--m); font-size: 13px; }
+  .msg.err { color: var(--fg); animation: shake .4s; }
+  .foot { color: var(--m2); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+
+  .wait-state { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r2);
+                background: #0006; border: 1px solid var(--b1); }
+  .wait-state b { display: block; font-weight: 500; }
+  .wait-state small { display: block; color: var(--m); font-size: 12px; }
+  .spinner { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--b2); border-top-color: var(--fg);
+             animation: spin 1s linear infinite; flex: none; }
+  .ok-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--fg); color: #000; flex: none;
+            display: grid; place-items: center; box-shadow: 0 0 24px #ffffff59; animation: pop .5s var(--spring); }
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start;
+              animation: enter .5s var(--ease) backwards; }
+  .steps li:nth-child(2) { animation-delay: 60ms; } .steps li:nth-child(3) { animation-delay: 120ms; }
+  .steps li::before { content: counter(s); width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+                      background: var(--s3); border: 1px solid var(--b2); font: 600 12px var(--display); color: var(--fg2); }
+  .steps .lbl { color: var(--fg2); padding-top: 3px; }
+  .copy { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .copy code { flex: 1; min-width: 0; height: 42px; display: flex; align-items: center; padding: 0 14px;
+               border-radius: var(--r3); border: 1px solid var(--b2); background: #00000059;
+               font-size: 14px; font-weight: 600; letter-spacing: .02em; overflow-x: auto; white-space: nowrap; }
+  .copy code.token { letter-spacing: .12em; }
+  .copy .btn { height: 42px; width: 42px; }
+
+  /* ---------- рабочий экран ---------- */
+  .app { max-width: 920px; margin: 0 auto; padding: 18px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+  .top { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 10px; border-radius: 18px;
+         animation: enter .6s var(--ease) backwards; }
+  .top .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .top .brand b { font: 700 15px var(--display); letter-spacing: .18em; white-space: nowrap; }
+  .top .brand small { display: block; color: var(--m); font-size: 12px; letter-spacing: 0; font-family: var(--sans); font-weight: 400; }
+  .who { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 999px;
+          border: 1px solid var(--b2); background: #0006; font-size: 12px; font-weight: 500; color: var(--fg2);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--m2); flex: none; }
+  .pill.on i { background: var(--fg); animation: pulse 2s infinite; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .card-head h3 { font: 600 18px var(--display); letter-spacing: -.02em; }
+  .card-head .sub { color: var(--m); font-size: 12px; }
+  .panel { animation: panelIn .6s var(--ease) backwards; }
+  .panel:nth-of-type(3) { animation-delay: 60ms; } .panel:nth-of-type(4) { animation-delay: 120ms; }
+
+  .drop { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 16px; text-align: center;
+          border: 1px dashed var(--b3); border-radius: var(--r2); background: #0000004d; cursor: pointer;
+          transition: border-color .2s, background .2s, transform .3s var(--ease); }
+  .drop:hover { border-color: var(--b4); background: #00000073; }
+  .drop.over { border-color: var(--fg); background: var(--s2); transform: scale(1.01); }
+  .drop .up { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+              background: var(--s3); border: 1px solid var(--b2); }
+  .drop b { font-weight: 500; font-size: 15px; }
+  .drop small { color: var(--m); font-size: 12px; }
+
+  .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; border-radius: var(--r2);
+         background: var(--s1); border: 1px solid var(--b1); transition: background .2s, border-color .2s;
+         animation: enter .45s var(--ease) backwards; }
+  .row:hover { background: var(--s2); border-color: var(--b2); }
+  .row .thumb { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex: none;
+                background: var(--s3); border: 1px solid var(--b1); color: var(--fg2); }
+  .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .row-body b { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-body small { color: var(--m); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-body small.ok { color: var(--fg2); }
+  .row-body small.err { color: var(--fg); }
+  .bar { height: 3px; margin-top: 7px; border-radius: 3px; background: var(--s3); overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--fg); box-shadow: 0 0 12px #ffffff80;
+             transition: width .3s var(--ease); }
+  .empty { padding: 26px 0 18px; text-align: center; color: var(--m); }
+  .meta-line { color: var(--m); font-size: 12px; margin: -6px 0 14px; overflow-wrap: anywhere; }
+
+  details summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+                    cursor: pointer; font: 600 16px var(--display); letter-spacing: -.01em; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary .chev { transition: transform .3s var(--ease); color: var(--m); }
+  details[open] summary .chev { transform: rotate(180deg); }
+  details .inner { margin-top: 14px; display: flex; flex-direction: column; gap: 2px; animation: enter .4s var(--ease); }
+  .hint { color: var(--m); font-size: 12px; margin-top: 10px; }
+
+  /* ---------- сейчас играет ---------- */
+  .np { display: flex; align-items: center; gap: 18px; }
+  .np-art { position: relative; width: 64px; height: 64px; border-radius: 18px; flex: none; display: grid; place-items: center;
+            background: var(--fg); color: #000; box-shadow: 0 0 40px #ffffff33; transition: box-shadow .4s, opacity .3s; }
+  .np-art .ico { animation: spin 5s linear infinite; }
+  .np.paused .np-art .ico, .np.closed .np-art .ico { animation-play-state: paused; }
+  .np.paused .np-art, .np.closed .np-art { box-shadow: none; opacity: .55; }
+  .np-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .np-label { display: flex; align-items: center; gap: 8px; color: var(--m); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+  .np-info b { font: 600 18px var(--display); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .np-info small { color: var(--m); font-size: 12px; }
+  .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+  .eq i { width: 2px; height: 100%; background: var(--fg); border-radius: 1px; transform-origin: bottom; animation: eq .9s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: -.3s; } .eq i:nth-child(3) { animation-delay: -.6s; }
+  .np.paused .eq i, .np.closed .eq i { animation: none; transform: scaleY(.3); background: var(--m2); }
+  @keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+  .np-ctrl { display: flex; align-items: center; gap: 10px; flex: none; }
+  .np-ctrl .btn.icon { width: 46px; height: 46px; border-radius: 14px; }
+  .btn.round { width: 58px; height: 58px; padding: 0; border-radius: 50%; }
+  .btn.round.primary:hover:not(:disabled) { transform: scale(1.05); }
+  .np-closed { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .toast { position: fixed; left: 50%; bottom: 28px; z-index: 100; display: flex; align-items: center; gap: 10px;
+           max-width: calc(100vw - 32px); width: max-content; padding: 10px 18px 10px 10px; border-radius: 14px; background: #fafafaf7;
+           color: #000; font-weight: 500; box-shadow: 0 24px 60px -12px #000000e6, 0 0 0 1px #ffffff40, 0 0 40px #ffffff26;
+           transform: translate(-50%); animation: toastIn .55s var(--spring); }
+  .toast .ti { width: 26px; height: 26px; border-radius: 8px; background: #000; color: #fff; display: grid; place-items: center; flex: none; }
+  .toast.out { animation: toastOut .3s var(--ease) forwards; }
+
+  /* ---------- анимации ---------- */
+  @keyframes drift { to { transform: translate3d(80px,60px,0) scale(1.12); } }
+  @keyframes enter { 0% { opacity: 0; transform: translateY(16px); } }
+  @keyframes pop { 0% { opacity: 0; transform: scale(.9); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0% { box-shadow: 0 0 #fff9; } 70%, to { box-shadow: 0 0 0 9px #fff0; } }
+  @keyframes shake { 20%, 60% { transform: translate(-5px); } 40%, 80% { transform: translate(5px); } }
+  @keyframes float { 50% { transform: translateY(-6px); } }
+  @keyframes authIn { 0% { opacity: 0; transform: translateY(28px) scale(.97); } }
+  @keyframes panelIn { 0% { opacity: 0; transform: translateY(12px) scale(.985); } }
+  @keyframes toastIn { 0% { opacity: 0; transform: translate(-50%, 24px) scale(.9); } }
+  @keyframes toastOut { to { opacity: 0; transform: translate(-50%, 12px) scale(.96); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+
+  @media (max-width: 560px) {
+    .card { padding: 16px; }
+    .auth { padding: 28px 20px 20px; }
+    .top .brand small, .pill .host { display: none; }
+    .top .brand b { letter-spacing: .12em; font-size: 14px; }
+    .logout-label, .row .btn span { display: none; }
+    .row .btn.danger { width: 32px; padding: 0; }
+    .row .btn.danger.armed { width: auto; padding: 0 10px; }
+    .row .btn.danger.armed span { display: inline; }
+    .np { flex-wrap: wrap; gap: 14px; }
+    .np-art { width: 52px; height: 52px; border-radius: 15px; }
+    .np-ctrl { width: 100%; justify-content: center; gap: 14px; }
+    .copy code { padding: 0 10px; font-size: 13px; }
+    .copy code.token { letter-spacing: .04em; }
+  }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="bg-orb a"></div><div class="bg-orb b"></div>
+  <div class="bg-grid"></div><div class="bg-light" id="bgLight"></div><div class="bg-noise"></div>
+</div>
+
+<!-- SVG-иконки -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-disc" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2a10 10 0 0 1 10 10"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19V5"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="5.5" y="4" width="4.5" height="16" rx="1.2" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4.5" height="16" rx="1.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  </defs>
+</svg>
+
+<!-- ========== Экраны входа и ожидания ========== -->
+<div class="auth-wrap" id="authWrap">
+  <!-- Первый запуск -->
+  <form class="glass card auth" id="setup" hidden autocomplete="off">
+    <div class="auth-logo">
+      <span class="brand-mark lg"><svg class="ico" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></span>
+      <h1>DJ LA POSE</h1>
+      <p>Первый запуск — придумай пароль для сайта</p>
+    </div>
+    <div class="fields">
+      <label class="field"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-key"/></svg>
+        <input class="input" id="newPass" type="password" placeholder="Новый пароль (от 6 символов)" autocomplete="new-password"></label>
+      <label class="field"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-key"/></svg>
+        <input class="input" id="newPass2" type="password" placeholder="Повтори пароль" autocomplete="new-password"></label>
+    </div>
+    <button class="btn primary lg wide" type="submit">Сохранить пароль</button>
+    <div class="msg" id="setupStatus"></div>
+  </form>
+
+  <!-- Вход -->
+  <form class="glass card auth" id="login" hidden>
+    <div class="auth-logo">
+      <span class="brand-mark lg"><svg class="ico" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></span>
+      <h1>DJ LA POSE</h1>
+      <p>Видео-экран</p>
+    </div>
+    <div class="fields">
+      <label class="field"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-key"/></svg>
+        <input class="input" id="pass" type="password" placeholder="Пароль" autocomplete="current-password"></label>
+    </div>
+    <button class="btn primary lg wide" type="submit">Войти</button>
+    <div class="msg" id="loginStatus"></div>
+  </form>
+
+  <!-- Ожидание подключения сервера -->
+  <div class="glass card auth wide" id="waiting" hidden>
+    <div class="auth-logo">
+      <span class="brand-mark lg"><svg class="ico" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></span>
+      <h1>DJ LA POSE</h1>
+      <p>Подключение компьютера</p>
+    </div>
+    <div class="wait-state" id="waitHead"></div>
+    <ol class="steps" id="connectSteps">
+      <li><div><div class="lbl">Запусти на компьютере</div>
+        <div class="copy"><code id="cmdBox">python agent.py</code>
+          <button class="btn icon" data-copy="cmdBox" title="Скопировать" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg></button></div></div></li>
+      <li><div><div class="lbl">Вставь в скрипт ссылку на сайт</div>
+        <div class="copy"><code id="siteUrl"></code>
+          <button class="btn icon" data-copy="siteUrl" title="Скопировать" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg></button></div></div></li>
+      <li><div><div class="lbl">И токен</div>
+        <div class="copy"><code class="token" id="tokenBox"></code>
+          <button class="btn icon" data-copy="tokenBox" title="Скопировать" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg></button></div></div></li>
+    </ol>
+    <button class="btn link" id="logoutWait" type="button">Выйти</button>
+  </div>
+
+  <p class="foot">© 2026 DJ LA POSE</p>
+</div>
+
+<!-- ========== Рабочий экран ========== -->
+<div class="app" id="main" hidden>
+  <header class="glass top">
+    <div class="brand">
+      <span class="brand-mark"><svg class="ico" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></span>
+      <div><b>DJ LA POSE</b><small>Видео-экран</small></div>
+    </div>
+    <div class="who">
+      <span class="pill" id="online"><i></i><span id="onlineText"></span></span>
+      <button class="btn ghost sm" id="logout" type="button" title="Выйти"><svg class="ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-out"/></svg><span class="logout-label">Выйти</span></button>
+    </div>
+  </header>
+
+  <section class="glass card panel np" id="nowCard" hidden>
+    <div class="np-art"><svg class="ico" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-disc"/></svg></div>
+    <div class="np-info">
+      <span class="np-label"><span class="eq"><i></i><i></i><i></i></span><span id="npLabel">Сейчас играет</span></span>
+      <b id="npName">—</b>
+      <small id="npState"></small>
+    </div>
+    <div class="np-ctrl" id="npCtrl">
+      <button class="btn icon" id="ctlPrev" type="button" title="Предыдущее видео" aria-label="Предыдущее видео"><svg class="ico" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-prev"/></svg></button>
+      <button class="btn primary round" id="ctlToggle" type="button" title="Пауза" aria-label="Пауза"><svg class="ico" width="22" height="22"><use href="#i-pause"/></svg></button>
+      <button class="btn icon" id="ctlNext" type="button" title="Следующее видео" aria-label="Следующее видео"><svg class="ico" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-next"/></svg></button>
+    </div>
+    <div class="np-ctrl" id="npClosed" hidden>
+      <button class="btn ghost" id="ctlOpen" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-screen"/></svg>Открыть плеер</button>
+    </div>
+  </section>
+
+  <section class="glass card panel">
+    <div class="card-head"><h3>Новое видео</h3><span class="sub">MP4 или WebM · до 5 ГБ</span></div>
+    <div class="drop" id="drop" role="button" tabindex="0">
+      <span class="up"><svg class="ico" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-up"/></svg></span>
+      <b>Перетащи видео сюда или нажми</b>
+      <small>Оно сразу уйдёт на компьютер и встанет в показ по кругу</small>
+    </div>
+    <input type="file" id="file" accept="video/*" multiple hidden>
+    <ul class="rows" id="uploads" style="margin-top:12px"></ul>
+  </section>
+
+  <section class="glass card panel" id="queueCard" hidden>
+    <div class="card-head"><h3>Передаётся на компьютер</h3></div>
+    <ul class="rows" id="queue"></ul>
+  </section>
+
+  <section class="glass card panel">
+    <div class="card-head">
+      <h3 id="title">На компьютере</h3>
+      <button class="btn icon sm" id="refresh" type="button" title="Обновить"><svg class="ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg></button>
+    </div>
+    <p class="meta-line" id="folder"></p>
+    <ul class="rows" id="list"></ul>
+  </section>
+
+  <section class="glass card panel">
+    <details>
+      <summary>Подключение сервера <svg class="ico chev" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev"/></svg></summary>
+      <div class="inner">
+        <div class="copy"><code id="siteUrl2"></code>
+          <button class="btn icon" data-copy="siteUrl2" title="Скопировать" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg></button></div>
+        <div class="copy"><code class="token" id="tokenBox2"></code>
+          <button class="btn icon" data-copy="tokenBox2" title="Скопировать" type="button"><svg class="ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg></button></div>
+        <p class="hint">Новый токен отключит текущий компьютер — в скрипте нужно будет ввести его заново.</p>
+        <div style="margin-top:10px"><button class="btn danger sm" id="rotate" type="button">Выдать новый токен</button></div>
+      </div>
+    </details>
+  </section>
+
+  <p class="foot" style="text-align:center;margin-top:6px">© 2026 DJ LA POSE</p>
+</div>
+
+<script type="module">
+import { upload } from "./blob-client.js";
+
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+  set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} },
+};
+const ONLINE_MS = 90000;
+let password = "";
+let timer = null;
+
+const icon = (id, size = 16) =>
+  `<svg class="ico" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+const fmtSize = (b) => {
+  const u = ["Б", "КБ", "МБ", "ГБ", "ТБ"]; let i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return b.toFixed(i ? 1 : 0) + " " + u[i];
+};
+const fmtDate = (t) => new Date(t).toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
+const ago = (ms) => {
+  const s = Math.round(ms / 1000);
+  if (s < 60) return "только что";
+  if (s < 3600) return Math.round(s / 60) + " мин назад";
+  if (s < 86400) return Math.round(s / 3600) + " ч назад";
+  return Math.round(s / 86400) + " дн назад";
+};
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- оформление: свет за курсором, тосты ----------
+
+const light = $("bgLight");
+window.addEventListener("pointermove", (e) => {
+  light.style.transform = `translate3d(${e.clientX - 350}px, ${e.clientY - 350}px, 0)`;
+  const card = e.target.closest?.(".glass");
+  document.querySelectorAll(".glass.lit").forEach((g) => g !== card && g.classList.remove("lit"));
+  if (card) {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty("--mx", e.clientX - r.left + "px");
+    card.style.setProperty("--my", e.clientY - r.top + "px");
+    card.classList.add("lit");
+  }
+}, { passive: true });
+
+let toastEl = null, toastTimer = null;
+function toast(text, ic = "i-check") {
+  if (toastEl) toastEl.remove();
+  toastEl = document.createElement("div");
+  toastEl.className = "toast";
+  toastEl.innerHTML = `<span class="ti">${icon(ic, 14)}</span><span></span>`;
+  toastEl.lastChild.textContent = text;
+  document.body.appendChild(toastEl);
+  clearTimeout(toastTimer);
+  const el = toastEl;
+  toastTimer = setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 300); }, 2600);
+}
+
+function setMsg(el, text, err = false) {
+  el.textContent = text;
+  el.className = "msg" + (err ? " err" : "");
+  if (err) { el.style.animation = "none"; el.offsetHeight; el.style.animation = ""; }
+}
+
+// ---------- экраны ----------
+
+function show(screen) {
+  const auth = ["setup", "login", "waiting"].includes(screen);
+  $("authWrap").hidden = !auth;
+  $("main").hidden = auth;
+  for (const id of ["setup", "login", "waiting"]) $(id).hidden = id !== screen;
+}
+
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: { Authorization: "Bearer " + password, ...(body ? { "Content-Type": "application/json" } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.error || "Ошибка " + res.status); e.status = res.status; throw e; }
+  return data;
+}
+
+async function start() {
+  $("siteUrl").textContent = $("siteUrl2").textContent = location.origin;
+  try {
+    const { claimed } = await api("/api/setup");
+    if (!claimed) { show("setup"); $("newPass").focus(); return; }
+  } catch (e) {
+    show("login"); setMsg($("loginStatus"), e.message, true); return;
+  }
+  const saved = store.get("vm_pass");
+  if (saved) login(saved); else { show("login"); $("pass").focus(); }
+}
+
+async function createPassword(e) {
+  e.preventDefault();
+  const a = $("newPass").value, b = $("newPass2").value, st = $("setupStatus");
+  if (a.length < 6) return setMsg(st, "Пароль должен быть не короче 6 символов", true);
+  if (a !== b) return setMsg(st, "Пароли не совпадают", true);
+  try {
+    const r = await fetch("/api/setup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: a }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "Ошибка " + r.status);
+    toast("Пароль сохранён");
+    login(a);
+  } catch (err) { setMsg(st, err.message, true); }
+}
+
+async function login(pass) {
+  password = pass;
+  setMsg($("loginStatus"), "Проверяю…");
+  try {
+    await refresh();
+    store.set("vm_pass", pass);
+  } catch (e) {
+    show("login");
+    setMsg($("loginStatus"), e.message, true);
+    if (e.status === 401) store.set("vm_pass", "");
+  }
+}
+
+function logout() {
+  clearTimeout(timer); password = ""; store.set("vm_pass", "");
+  show("login"); $("pass").value = ""; setMsg($("loginStatus"), "");
+}
+
+function schedule(ms) {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    if (document.hidden) return schedule(ms);
+    refresh().catch(() => schedule(ms));
+  }, ms);
+}
+
+// ---------- обновление ----------
+
+let lastWaitKey = "";
+
+async function refresh() {
+  const { status, queue, token, now } = await api("/api/panel");
+  $("tokenBox").textContent = $("tokenBox2").textContent = token;
+  const online = status && now - status.seen < ONLINE_MS;
+
+  if (!online || status.stage === "folder") {
+    const key = !online ? (status ? "off" : "none") : "folder";
+    if (key !== lastWaitKey) {
+      lastWaitKey = key;
+      $("waitHead").innerHTML = !online
+        ? `<div class="spinner"></div><div><b>Ожидание подключения сервера…</b><small>${status ? "Сервер был в сети " + ago(now - status.seen) + " — запусти скрипт снова" : "Сделай три шага ниже на компьютере"}</small></div>`
+        : `<div class="ok-dot">${icon("i-check", 14)}</div><div><b>Сервер подключён${status.host ? " · " + esc(status.host) : ""}</b><small>Теперь укажи в скрипте папку для видео</small></div>`;
+      if (key === "folder") toast("Сервер подключён", "i-server");
+    }
+    $("connectSteps").hidden = online;
+    show("waiting");
+    return schedule(online ? 3000 : 4000);
+  }
+
+  if (lastWaitKey === "folder") toast("Готово — можно загружать видео", "i-film");
+  lastWaitKey = "";
+  show("main");
+  $("online").className = "pill on";
+  $("onlineText").innerHTML = "онлайн" + (status.host ? `<span class="host"> · ${esc(status.host)}</span>` : "");
+  lastStatus = status;
+  renderNow(status);
+  renderQueue(status, queue);
+  renderFiles(status, queue, now);
+  schedule(Date.now() < fastUntil ? 1500 : queue.length || status.busy ? 3000 : 12000);
+}
+
+// ---------- пульт плеера ----------
+
+let lastStatus = null;
+let fastUntil = 0;          // после нажатия на пульт пару секунд обновляем чаще
+let optimistic = null;      // {paused, until} — показываем нажатое сразу, не дожидаясь компьютера
+
+function renderNow(status) {
+  const p = status.player;
+  const card = $("nowCard");
+  card.hidden = !p;
+  if (!p) return;
+  let paused = p.paused;
+  if (optimistic && Date.now() < optimistic.until && optimistic.paused !== p.paused) paused = optimistic.paused;
+  const hasFiles = (status.files || []).length > 0;
+
+  card.classList.toggle("closed", !p.open);
+  card.classList.toggle("paused", p.open && (paused || !p.name));
+  $("npCtrl").hidden = !p.open;
+  $("npClosed").hidden = p.open;
+
+  if (!p.open) {
+    $("npLabel").textContent = "Плеер";
+    $("npName").textContent = "Окно плеера закрыто";
+    $("npState").textContent = "Открой его, чтобы видео снова показывались на экране";
+    return;
+  }
+  $("npLabel").textContent = !p.name ? "Плеер" : paused ? "На паузе" : "Сейчас играет";
+  $("npName").textContent = p.name || (hasFiles ? "Запускается…" : "Нет видео");
+  $("npState").textContent = !hasFiles ? "Загрузи видео — оно сразу начнёт играть"
+    : `${status.files.length} в показе по кругу`;
+  const t = $("ctlToggle");
+  t.innerHTML = `<svg class="ico" width="22" height="22"><use href="#${paused ? "i-play" : "i-pause"}"/></svg>`;
+  t.title = t.ariaLabel = paused ? "Продолжить" : "Пауза";
+  t.dataset.action = paused ? "play" : "pause";
+  for (const id of ["ctlPrev", "ctlToggle", "ctlNext"]) $(id).disabled = !hasFiles;
+}
+
+async function control(action, btn) {
+  if (action === "pause" || action === "play") {
+    optimistic = { paused: action === "pause", until: Date.now() + 5000 };
+    if (lastStatus) renderNow(lastStatus);
+  }
+  btn?.animate?.([{ transform: "scale(.9)" }, { transform: "scale(1)" }], { duration: 300, easing: "cubic-bezier(.34,1.56,.64,1)" });
+  try {
+    await api("/api/panel", { type: "control", action });
+    fastUntil = Date.now() + 6000;
+    schedule(1200);
+    if (action === "open") toast("Открываю плеер на компьютере", "i-screen");
+  } catch (e) {
+    optimistic = null;
+    if (lastStatus) renderNow(lastStatus);
+    toast("Ошибка: " + e.message);
+  }
+}
+
+function makeRow(name, meta, ic = "i-film") {
+  const li = document.createElement("li"); li.className = "row";
+  li.innerHTML = `<span class="thumb">${icon(ic)}</span><div class="row-body"><b></b><small></small></div>`;
+  li.querySelector("b").textContent = name;
+  li.querySelector("small").textContent = meta;
+  return li;
+}
+
+function renderQueue(status, queue) {
+  $("queueCard").hidden = !queue.length && !status.busy;
+  const ql = $("queue"); ql.innerHTML = "";
+  if (status.busy) {
+    const li = makeRow(status.busy.name, `Компьютер скачивает… ${status.busy.percent ?? 0}%`, "i-down");
+    li.querySelector(".row-body").insertAdjacentHTML("beforeend", `<div class="bar"><i style="width:${status.busy.percent ?? 0}%"></i></div>`);
+    ql.appendChild(li);
+  }
+  for (const c of queue) {
+    ql.appendChild(c.type === "download"
+      ? makeRow(c.name, `Ждёт скачивания · ${fmtSize(c.size || 0)}`, "i-down")
+      : makeRow(c.name, "Ждёт удаления", "i-trash"));
+  }
+}
+
+function renderFiles(status, queue, now) {
+  const files = status.files || [];
+  $("title").textContent = `На компьютере · ${files.length}`;
+  $("folder").textContent = `${status.folder} · свободно ${fmtSize(status.disk_free)} из ${fmtSize(status.disk_total)} · обновлено ${ago(now - status.seen)}`;
+  const pending = new Set(queue.filter((c) => c.type === "delete").map((c) => c.name));
+  const list = $("list"); list.innerHTML = "";
+  if (!files.length) { list.innerHTML = '<li class="empty">Папка пуста — загрузи первое видео</li>'; return; }
+  files.forEach((f, i) => {
+    const waiting = pending.has(f.name);
+    const li = makeRow(f.name, `${fmtSize(f.size)} · ${fmtDate(f.modified * 1000)}${waiting ? " · ждёт удаления" : ""}`);
+    li.style.animationDelay = Math.min(i, 10) * 30 + "ms";
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn danger sm"; btn.disabled = waiting;
+    btn.innerHTML = icon("i-trash", 14) + "<span>Удалить</span>";
+    btn.onclick = () => removeFile(f.name, btn);
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+// ---------- действия ----------
+
+// Удаление в два нажатия: первое «взводит» кнопку, второе удаляет
+function armed(btn, label) {
+  if (btn.classList.contains("armed")) { btn.classList.remove("armed"); return true; }
+  btn.classList.add("armed");
+  const span = btn.querySelector("span") || btn;
+  const old = span.textContent; span.textContent = label;
+  setTimeout(() => { btn.classList.remove("armed"); span.textContent = old; }, 3000);
+  return false;
+}
+
+async function removeFile(name, btn) {
+  if (!armed(btn, "Точно?")) return;
+  btn.disabled = true;
+  try { await api("/api/panel", { type: "delete", name }); toast("Удалится с компьютера", "i-trash"); await refresh(); }
+  catch (e) { toast("Ошибка: " + e.message, "i-trash"); btn.disabled = false; }
+}
+
+async function rotateToken() {
+  const btn = $("rotate");
+  if (!armed(btn, "Точно? Компьютер отключится")) return;
+  try { await api("/api/panel", { type: "rotate_token" }); toast("Выдан новый токен", "i-key"); await refresh(); }
+  catch (e) { toast("Ошибка: " + e.message); }
+}
+
+async function uploadOne(file) {
+  const li = makeRow(file.name, `${fmtSize(file.size)} · загрузка 0%`, "i-up");
+  const meta = li.querySelector("small");
+  li.querySelector(".row-body").insertAdjacentHTML("beforeend", '<div class="bar"><i></i></div>');
+  const bar = li.querySelector(".bar");
+  $("uploads").prepend(li);
+  try {
+    const blob = await upload("inbox/" + file.name, file, {
+      access: "public",
+      handleUploadUrl: "/api/upload",
+      clientPayload: password,
+      multipart: file.size > 50 * 1024 * 1024,
+      contentType: file.type || "application/octet-stream",
+      onUploadProgress: ({ percentage }) => {
+        meta.textContent = `${fmtSize(file.size)} · загрузка ${Math.round(percentage)}%`;
+        bar.firstChild.style.width = percentage + "%";
+      },
+    });
+    await api("/api/panel", { type: "download", url: blob.url, name: file.name, size: file.size });
+    meta.textContent = `${fmtSize(file.size)} · загружено, передаётся на компьютер`;
+    meta.className = "ok"; bar.remove();
+    li.querySelector(".thumb").innerHTML = icon("i-check");
+    toast("Видео отправлено на компьютер", "i-film");
+    refresh().catch(() => {});
+    setTimeout(() => li.remove(), 8000);
+  } catch (e) {
+    meta.textContent = "Ошибка: " + e.message; meta.className = "err"; bar.remove();
+  }
+}
+
+async function uploadAll(files) {
+  for (const f of files) await uploadOne(f); // по одному, чтобы не забить канал
+}
+
+async function copyFrom(id) {
+  const text = $(id).textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch {
+    const r = document.createRange(); r.selectNodeContents($(id));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy");
+  }
+  toast("Скопировано", "i-copy");
+}
+
+// ---------- события ----------
+
+$("setup").onsubmit = createPassword;
+$("login").onsubmit = (e) => { e.preventDefault(); login($("pass").value); };
+$("logout").onclick = logout;
+$("logoutWait").onclick = logout;
+$("rotate").onclick = rotateToken;
+$("ctlToggle").onclick = (e) => control(e.currentTarget.dataset.action || "pause", e.currentTarget);
+$("ctlNext").onclick = (e) => control("next", e.currentTarget);
+$("ctlPrev").onclick = (e) => control("prev", e.currentTarget);
+$("ctlOpen").onclick = (e) => control("open", e.currentTarget);
+$("refresh").onclick = () => refresh().then(() => toast("Обновлено", "i-refresh")).catch((e) => toast(e.message));
+document.querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => copyFrom(b.dataset.copy)));
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } };
+$("file").onchange = (e) => { uploadAll([...e.target.files]); e.target.value = ""; };
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); uploadAll([...e.dataTransfer.files]); };
+document.addEventListener("visibilitychange", () => { if (!document.hidden && password) refresh().catch(() => {}); });
+
+start();
+</script>
+</body>
+</html>
